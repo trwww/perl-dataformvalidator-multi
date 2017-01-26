@@ -1,0 +1,186 @@
+use warnings;
+use strict;
+
+use Data::FormValidator::Multi;
+
+package # Hide from PAUSE
+  Test::Data::FormValidator::Multi;
+
+use base qw(Test::Class);
+use Test::More;
+use Data::FormValidator::Profile;
+
+# startup methods are run once when you start running a test class
+#sub startup : Test(startup) {
+##  shift->{dbi} = DBI->connect;
+#}
+
+# setup methods are run before every test method
+sub setup : Test(setup) {
+  my $self = shift;
+
+  $self->{dfvp} = Data::FormValidator::Profile->new({
+    filters => [qw( trim )],
+  });
+}
+
+# teardown methods are run after every test method.
+use Data::Dumper;
+sub teardown : Test(teardown) {
+  my $self = shift;
+
+  my $results = $self->{results};
+  diag( Data::Dumper->Dump([$results->to_json], ['json']) );
+}
+
+# shutdown methods are run once just before a test class stops running
+#sub shutdown : Test(shutdown) {
+##  shift->{dbi}->disconnect;
+#}
+
+# helper methods that return data structures that are combined to build input data to test the profiles with
+
+sub toplevel { return(
+  name      => 'FooBar',
+  dashboard => -23,
+)}
+
+sub foobar { return(
+  foo => 'Foo',
+  bar => 'Bar',
+)}
+
+sub meta { return(
+  meta  => {
+    $_[0]->foobar,
+  },
+)}
+
+sub timezones {
+  my $self = shift;
+
+  my $timezones = [];
+
+  foreach my $data ( @_ ) {
+    push @$timezones => {
+      id   => $data->[0],
+      zone => $data->[1],
+      name => $data->[2],
+      date => $data->[3],
+      time => $data->[4],
+    };
+  }
+
+  return( timezones => $timezones );
+}
+
+sub hash_in_hash { return(
+  hash_in_hash => {
+    bar => 'Bar',
+    foo => {
+      $_[0]->foobar,
+    },
+  },
+)}
+
+sub array_in_hash { return(
+  array_in_hash => {
+    bar => 'Bar',
+    foo => [
+      {
+        $_[0]->foobar,
+      },
+      {
+        $_[0]->foobar,
+      },
+    ],
+  },
+)}
+
+# helper methods to construct dfv profiles
+
+our $main_profile = {
+  required => [
+    'name',      # example field - regular dfv handling
+    'dashboard', # example field - regular dfv handling
+    'timezones', # array of hashes - dfvm iterates dfvr on each element
+  ],
+  optional => [
+    'meta',      # hash - dfvm calls dfvr on it | validation succeeds if field is not present
+  ],
+  constraint_methods => {
+    'dashboard' => [
+      {
+        name              => 'not_positive',
+        constraint_method => sub {
+          my ($dfv, $val) = @_;
+          return $val =~ /\A\d+\z/;
+        }
+      },
+    ],
+  },
+  msgs => {
+    invalid_seperator => ' ## ',
+    format            => 'ERROR: %s',
+    missing           => 'FIELD IS REQUIRED',
+    invalid           => 'FIELD IS INVALID',
+    constraints       => {
+      not_positive => 'MUST BE POSITIVE',
+    }
+  },
+};
+
+our $timezones_profile = {
+  required => [
+    'id',
+    'zone',
+    'name',
+    'date',
+    'time',
+  ],
+  constraint_methods => {
+    'id' => [
+      {
+        name              => 'not_positive',
+        constraint_method => sub {
+          my ($dfv, $val) = @_;
+          return $val =~ /\A\d+\z/;
+        }
+      },
+    ],
+    'date' => [
+      {
+        name              => 'bad_date_format',
+        constraint_method => sub {
+          my ($dfv, $val) = @_;
+          return $val =~ m|^\d{2}/\d{2}$|;
+        }
+      },
+    ],
+  },
+  msgs => {
+    invalid_seperator => ' ## ',
+    format            => 'ERROR: %s',
+    missing           => 'FIELD IS REQUIRED',
+    invalid           => 'FIELD IS INVALID',
+    constraints       => {
+      not_positive     => 'MUST BE POSITIVE',
+      bad_date_format  => 'DATE FORMAT MUST BE MM/DD',
+    }
+  },
+};
+
+our $meta_profile = {
+  required => [
+    'foo',
+    'bar',
+  ],
+  msgs => {
+    invalid_seperator => ' ## ',
+    format            => 'ERROR: %s',
+    missing           => 'FIELD IS REQUIRED',
+    invalid           => 'FIELD IS INVALID',
+  },
+};
+
+1;
