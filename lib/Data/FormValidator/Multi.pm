@@ -55,7 +55,13 @@ sub check_nested_for {
 sub has_nested_profiles {
   my($self, $profile, $field, $results) = @_;
 
-  die 'nested profiles unimplemented';
+  if ( my $data = $results->valid($field) ) { # data can be an array or hash
+    my $nested_results = (ref $self)->new( $profile )->check( $data );
+
+    if ( ! $nested_results->success ) {
+      $self->move_from_valid_to_objects( $field, $results, $nested_results );
+    }
+  }
 }
 
 sub no_nested_profiles {
