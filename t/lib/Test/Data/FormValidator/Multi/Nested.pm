@@ -14,10 +14,10 @@ sub nested : Test(2) {
   my $data = $self->skeleton_data;
   my $dfv  = $self->nested_validator;
 
-# $data->{hash_in_hash}{foo}{bar} = $self->timezones(
-#    [ 999, 'America/New_York',    'Home',  '01/01', '23:59'],
-#    [ 111, 'America/Los_Angeles', 'L. A.', '01/01', '20:59'],
-#  );
+  $data->{hash_in_hash}{foo}{bar} = $self->timezones(
+    [ 999, 'America/New_York',    'Home',  '01/01', '23:59'],
+    [ 111, 'America/Los_Angeles', 'L. A.', '01/01', '20:59'],
+  );
 
   diag( Data::Dumper->Dump([$data], ['data']) );
 

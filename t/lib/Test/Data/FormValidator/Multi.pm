@@ -20,7 +20,7 @@ sub skeleton_data {
       [ 999, 'America/New_York',    'Home',  '01/01', '23:59'],
       [ 111, 'America/Los_Angeles', 'L. A.', '01/01', '20:59'],
     ),
-#    $self->hash_in_hash,
+    $self->hash_in_hash,
     $self->array_in_hash,
   };
 
