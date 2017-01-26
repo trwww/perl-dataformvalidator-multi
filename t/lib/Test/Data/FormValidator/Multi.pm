@@ -27,6 +27,20 @@ sub skeleton_data {
   return $data;
 }
 
+sub skeleton_validator {
+  my $self = shift;
+
+  my $dfvm = Data::FormValidator::Multi->new({
+    profile     => $self->main_profile->profile,
+    subprofiles => {
+      timezones  => $self->timezones_profile->profile,
+      meta       => $self->meta_profile->profile,
+    }
+  });
+
+  return $dfvm;
+}
+
 sub skeleton_profile {
   my $self = shift;
 

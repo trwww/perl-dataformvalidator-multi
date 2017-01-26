@@ -12,13 +12,7 @@ sub basic : Test(2) {
 
   my $data = $self->skeleton_data;
 
-  my $dfv = Data::FormValidator::Multi->new({
-    profile     => $self->main_profile->profile,
-    subprofiles => {
-      timezones  => $self->timezones_profile->profile,
-      meta       => $self->meta_profile->profile,
-    }
-  });
+  my $dfv = $self->skeleton_validator;
 
   isa_ok(
     my $results = $self->{results} = $dfv->check($data)
