@@ -8,7 +8,7 @@ use base qw(Test::Data::FormValidator::Multi);
 use Test::More;
 use Data::Dumper;
 
-sub nested : Test(2) {
+sub nested : Test(3) {
   my $self = shift;
 
   my $data = $self->skeleton_data;

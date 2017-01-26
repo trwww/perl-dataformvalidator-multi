@@ -7,11 +7,13 @@ package # Hide from PAUSE
 use base qw(Test::Data::FormValidator::Multi);
 use Test::More;
 
-sub basic : Test(2) {
+sub basic : Test(3) {
   my $self = shift;
 
   my $data = $self->skeleton_data;
   my $dfv  = $self->skeleton_validator;
+
+  delete $data->{timezones}[1]{name};
 
   isa_ok(
     my $results = $self->{results} = $dfv->check($data)
@@ -20,6 +22,16 @@ sub basic : Test(2) {
   );
 
   ok(! $results->success, 'data is invalid');
+
+  is_deeply( $results->to_json, {
+    'dashboard' => 'ERROR: MUST BE POSITIVE',
+    'timezones' => [
+      undef,
+      {
+        'name' => 'ERROR: FIELD IS REQUIRED'
+      }
+    ]
+  } => 'got expected value');
 }
 
 
