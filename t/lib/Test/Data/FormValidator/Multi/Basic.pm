@@ -11,8 +11,7 @@ sub basic : Test(2) {
   my $self = shift;
 
   my $data = $self->skeleton_data;
-
-  my $dfv = $self->skeleton_validator;
+  my $dfv  = $self->skeleton_validator;
 
   isa_ok(
     my $results = $self->{results} = $dfv->check($data)
