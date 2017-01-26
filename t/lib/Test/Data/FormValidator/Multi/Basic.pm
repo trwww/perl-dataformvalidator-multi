@@ -22,10 +22,10 @@ sub basic : Test(2) {
   };
 
   my $dfv = Data::FormValidator::Multi->new({
-    profile     => $Test::Data::FormValidator::Multi::main_profile,
+    profile     => $self->main_profile->profile,
     subprofiles => {
-      timezones  => $Test::Data::FormValidator::Multi::timezones_profile,
-      meta       => $Test::Data::FormValidator::Multi::meta_profile,
+      timezones  => $self->timezones_profile->profile,
+      meta       => $self->meta_profile->profile,
     }
   });
 

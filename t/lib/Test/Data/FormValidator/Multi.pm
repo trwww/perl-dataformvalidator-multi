@@ -10,6 +10,24 @@ use base qw(Test::Class);
 use Test::More;
 use Data::FormValidator::Profile;
 
+sub skeleton_profile {
+  my $self = shift;
+
+  return Data::FormValidator::Profile->new({
+    filters => [qw( trim )],
+    msgs    => {
+      invalid_seperator => ' ## ',
+      format            => 'ERROR: %s',
+      missing           => 'FIELD IS REQUIRED',
+      invalid           => 'FIELD IS INVALID',
+      constraints       => {
+          not_positive    => 'MUST BE POSITIVE',
+          bad_date_format => 'DATE FORMAT MUST BE MM/DD',
+      }
+    },
+  });
+}
+
 # startup methods are run once when you start running a test class
 #sub startup : Test(startup) {
 ##  shift->{dbi} = DBI->connect;
@@ -19,9 +37,7 @@ use Data::FormValidator::Profile;
 sub setup : Test(setup) {
   my $self = shift;
 
-  $self->{dfvp} = Data::FormValidator::Profile->new({
-    filters => [qw( trim )],
-  });
+  $self->{dfvp} = $self->skeleton_profile;
 }
 
 # teardown methods are run after every test method.
@@ -99,88 +115,94 @@ sub array_in_hash { return(
 
 # helper methods to construct dfv profiles
 
-our $main_profile = {
-  required => [
-    'name',      # example field - regular dfv handling
-    'dashboard', # example field - regular dfv handling
-    'timezones', # array of hashes - dfvm iterates dfvr on each element
+my $main_profile_constraint_methods = {
+  'dashboard' => [
+    {
+      name              => 'not_positive',
+      constraint_method => sub {
+        my ($dfv, $val) = @_;
+        return $val =~ /\A\d+\z/;
+      }
+    },
   ],
-  optional => [
-    'meta',      # hash - dfvm calls dfvr on it | validation succeeds if field is not present
-  ],
-  constraint_methods => {
-    'dashboard' => [
-      {
-        name              => 'not_positive',
-        constraint_method => sub {
-          my ($dfv, $val) = @_;
-          return $val =~ /\A\d+\z/;
-        }
-      },
-    ],
-  },
-  msgs => {
-    invalid_seperator => ' ## ',
-    format            => 'ERROR: %s',
-    missing           => 'FIELD IS REQUIRED',
-    invalid           => 'FIELD IS INVALID',
-    constraints       => {
-      not_positive => 'MUST BE POSITIVE',
-    }
-  },
 };
 
-our $timezones_profile = {
-  required => [
-    'id',
-    'zone',
-    'name',
-    'date',
-    'time',
-  ],
-  constraint_methods => {
-    'id' => [
-      {
-        name              => 'not_positive',
-        constraint_method => sub {
-          my ($dfv, $val) = @_;
-          return $val =~ /\A\d+\z/;
-        }
-      },
+sub main_profile {
+  my $self = shift;
+
+  my $profile = $self->skeleton_profile;
+
+  my $fields = {
+    required => [
+      'name',      # example field - regular dfv handling
+      'dashboard', # example field - regular dfv handling
+      'timezones', # array of hashes - dfvm iterates dfvr on each element
     ],
-    'date' => [
-      {
-        name              => 'bad_date_format',
-        constraint_method => sub {
-          my ($dfv, $val) = @_;
-          return $val =~ m|^\d{2}/\d{2}$|;
-        }
-      },
+    optional => [
+      'meta',      # hash - dfvm calls dfvr on it | validation succeeds if field is not present
     ],
-  },
-  msgs => {
-    invalid_seperator => ' ## ',
-    format            => 'ERROR: %s',
-    missing           => 'FIELD IS REQUIRED',
-    invalid           => 'FIELD IS INVALID',
-    constraints       => {
-      not_positive     => 'MUST BE POSITIVE',
-      bad_date_format  => 'DATE FORMAT MUST BE MM/DD',
+  };
+
+  while( my($type, $fields) = each %$fields ) {
+    foreach my $field ( @$fields ) {
+      $profile->add( $field,
+        required    => $type eq 'required',
+        constraints => $main_profile_constraint_methods->{$field},
+      );
     }
-  },
+  }
+
+  return $profile;
+}
+
+my $timezones_profile_constraint_methods = {
+  'id' => [
+    {
+      name              => 'not_positive',
+      constraint_method => sub {
+        my ($dfv, $val) = @_;
+        return $val =~ /\A\d+\z/;
+      }
+    },
+  ],
+  'date' => [
+    {
+      name              => 'bad_date_format',
+      constraint_method => sub {
+        my ($dfv, $val) = @_;
+        return $val =~ m|^\d{2}/\d{2}$|;
+      }
+    },
+  ],
 };
 
-our $meta_profile = {
-  required => [
-    'foo',
-    'bar',
-  ],
-  msgs => {
-    invalid_seperator => ' ## ',
-    format            => 'ERROR: %s',
-    missing           => 'FIELD IS REQUIRED',
-    invalid           => 'FIELD IS INVALID',
-  },
+sub timezones_profile {
+  my $self = shift;
+
+  my $profile = $self->skeleton_profile;
+
+  foreach my $field ( qw(id zone name date time) ) {
+    $profile->add( $field,
+      required    => 1,
+      constraints => $timezones_profile_constraint_methods->{$field},
+    );
+  }
+
+  return $profile;
 };
+
+sub meta_profile {
+  my $self = shift;
+
+  my $profile = $self->skeleton_profile;
+
+  foreach my $field ( qw(foo bar) ) {
+    $profile->add( $field,
+      required => 1,
+    );
+  }
+
+  return $profile;
+}
 
 1;
