@@ -37,7 +37,7 @@ sub skeleton_profile {
 sub setup : Test(setup) {
   my $self = shift;
 
-  $self->{dfvp} = $self->skeleton_profile;
+#  $self->{dfvp} = $self->skeleton_profile;
 }
 
 # teardown methods are run after every test method.
