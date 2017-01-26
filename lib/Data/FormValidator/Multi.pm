@@ -7,13 +7,21 @@ package Data::FormValidator::Multi;
 use base qw(Data::FormValidator);
 
 sub check {
-  my $self = shift;
+  my($self, $datas, $profile) = @_;
 
-  my $results = $self->SUPER::check( @_, $self->{profiles}{profile} );
+  my $results = [];
+  if ( ref $datas eq 'ARRAY' ) {
+    foreach my $data ( @$datas ) {
+      my $element_results = (ref $self)->new->check( $data, $self->{profiles}{profile} );
+      push @$results => $element_results;
+    }
+  } else {
+    $results = $self->SUPER::check( $datas, $self->{profiles}{profile} || $profile );
+  }
 
-  bless $results => 'Data::FormValidator::Multi::Results'; # so to_json can be called on it
+  bless $results => 'Data::FormValidator::Multi::Results';
 
-  $self->check_nested( $results );
+  $self->check_nested( $results ) unless ref $datas eq 'ARRAY';
 
   return $results;
 }

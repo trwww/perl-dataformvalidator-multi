@@ -13,13 +13,32 @@ in addition to the inherited logic, success is also false if there is something 
 =cut
 
 sub success {
-    my $self = shift;
-    my $parent_success = $self->SUPER::success;
+  my $self = shift;
 
-    return $self->has_objects ? undef : $parent_success;
+  if ( $self->isa('ARRAY') ) {
+    return !! grep $_->success, @$self;
+  } else {
+    return $self->has_objects ? undef : $self->SUPER::success;
+  }
 }
 
 sub to_json {
+  my $self = shift;
+
+  my $json = [];
+
+  if ( $self->isa('ARRAY') ) {
+    foreach my $results ( @$self ) {
+      push @$json => $results->to_json;
+    }
+  } else {
+    $json = $self->profile_json;
+  }
+
+  return $json;
+}
+
+sub profile_json {
   my $self = shift;
 
   my $json = {}; my $messages = $self->msgs;
