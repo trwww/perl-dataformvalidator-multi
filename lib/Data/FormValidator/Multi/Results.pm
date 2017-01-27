@@ -6,9 +6,37 @@ use UNIVERSAL;
 package Data::FormValidator::Multi::Results;
 use base qw(Data::FormValidator::Results);
 
-=head1 success
+=encoding utf8
 
-in addition to the inherited logic, success is also false if there is something in $self->{objects}
+=head1 NAME
+
+Data::FormValidator::Multi::Results - Provide a multidimensional hash or array of DFVM results
+
+=head1 SYNOPSIS
+
+    # run the check on the data
+    my $results = $dfv->check( $data );
+    
+    if ( ! $results->success ) {
+      $c->stash->{json}{errors} = $results->to_json;
+      return;
+    }
+
+    # handle valid data
+
+=head1 DESCRIPTION
+
+Results of the check performed by Data::FormValidator::Multi
+
+=head1 METHODS
+
+=head2 success
+
+If this is an array of results, return true if all of the elements in the array
+are valid.
+
+If DF::Multi found invalid sub elements, return false. Otherwise, return
+the parent class result of success.
 
 =cut
 
@@ -21,6 +49,14 @@ sub success {
     return $self->has_objects ? undef : $self->SUPER::success;
   }
 }
+
+=head2 to_json
+
+If this is an array of results, call to_json on each element and return an array
+of the results. Otherwise, return a data structure that represents the invalid
+(if any) data in the object.
+
+=cut
 
 sub to_json {
   my $self = shift;
@@ -37,6 +73,13 @@ sub to_json {
 
   return $json;
 }
+
+=head2 profile_json
+
+Build a hash with invalid field names as keys and that field's errors as the
+value. Iterate over the invalid nested objects and call to_json on them.
+
+=cut
 
 sub profile_json {
   my $self = shift;
@@ -68,7 +111,7 @@ sub profile_json {
   return $json;
 }
 
-=head1 has_objects
+=head2 has_objects
 
 This method returns true if the results contain objects fields.
 
@@ -79,7 +122,7 @@ sub has_objects {
 
 }
 
-=head1 objects( [field] )
+=head2 objects( [field] )
 
 In list context, it returns the list of fields which are objects.
 In a scalar context, it returns an hash reference which contains the objects
@@ -96,5 +139,28 @@ sub objects {
 
     wantarray ? keys %{$_[0]{objects}} : $_[0]{objects};
 }
+
+=head1 SEE ALSO
+
+=over 4
+
+=item *
+
+L<Data::FormValidator::Results>
+
+=back
+
+=head1 AUTHOR
+
+Todd Wade <waveright@gmail.com>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2016 by Todd Wade.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+=cut
 
 1;
