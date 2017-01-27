@@ -188,6 +188,7 @@ outputs:
                      'timezones' => [
                                       undef,
                                       {
+                                        'id' => 'MUST BE POSITIVE',
                                         'date' => 'FIELD IS REQUIRED'
                                       }
                                     ],
