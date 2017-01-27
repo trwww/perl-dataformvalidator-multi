@@ -120,7 +120,7 @@ test for an example of validating an arbitrarily deep data structure.
       msgs => {
         invalid     => 'FIELD IS INVALID',
         missing     => 'FIELD IS REQUIRED',
-        format        => '%s',
+        format      => '%s',
         constraints => {
           bad_date_format => 'DATE FORMAT MUST BE MM/DD',
           not_positive    => 'MUST BE POSITIVE'
@@ -132,7 +132,7 @@ test for an example of validating an arbitrarily deep data structure.
     my $meta_profile = {
       required => [qw( foo bar bazz )],
       msgs     => {
-        format    => '%s',
+        format  => '%s',
         invalid => 'FIELD IS INVALID',
         missing => 'FIELD IS REQUIRED',
       },
