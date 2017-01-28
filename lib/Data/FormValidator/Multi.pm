@@ -118,12 +118,11 @@ test for an example of validating an arbitrarily deep data structure.
         ]
       },
       msgs => {
+        format      => '%s',
         invalid     => 'FIELD IS INVALID',
         missing     => 'FIELD IS REQUIRED',
-        format      => '%s',
         constraints => {
-          bad_date_format => 'DATE FORMAT MUST BE MM/DD',
-          not_positive    => 'MUST BE POSITIVE'
+          not_positive => 'MUST BE POSITIVE'
         }
       }
     };
@@ -135,7 +134,7 @@ test for an example of validating an arbitrarily deep data structure.
         format  => '%s',
         invalid => 'FIELD IS INVALID',
         missing => 'FIELD IS REQUIRED',
-      },
+      }
     };
     
     # profile for the data in the $data->{timezones} array
@@ -153,9 +152,9 @@ test for an example of validating an arbitrarily deep data structure.
         ]
       },
       msgs => {
+        format      => '%s',
         invalid     => 'FIELD IS INVALID',
         missing     => 'FIELD IS REQUIRED',
-        format      => '%s',
         constraints => {
           not_positive => 'MUST BE POSITIVE'
         }
