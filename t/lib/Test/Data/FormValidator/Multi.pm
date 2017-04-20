@@ -77,7 +77,7 @@ sub teardown : Test(teardown) {
   my $self = shift;
 
   my $results = $self->{results};
-  diag( Data::Dumper->Dump([$results->to_json], ['json']) );
+  diag( Data::Dumper->Dump([$results->to_json], ['json']) ) if $ENV{TEST_DIAG};
 }
 
 # shutdown methods are run once just before a test class stops running
