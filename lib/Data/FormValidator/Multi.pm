@@ -302,7 +302,9 @@ sub handle_hash_input {
 
   my $nested_results = Data::FormValidator::Multi::Results->new( $profile, $datas );
 
-  if ( ! $nested_results->success ) {
+  if ( $nested_results->success ) {
+    $results->valid( $field => $nested_results );
+  } else {
     $self->move_from_valid_to_objects( $field, $results, $nested_results );
   }
 }
@@ -320,6 +322,7 @@ sub handle_array_input {
   my $error = {};
   my $errors = $error->{errors} = [];
   $error->{total} = $error->{count} = 0;
+  my $all_results = [];
 
   foreach my $data ( @$datas ) {
     $error->{total}++;
@@ -327,6 +330,7 @@ sub handle_array_input {
 
     my $nested_results = Data::FormValidator::Multi::Results->new( $profile, $data );
 
+    push @$all_results => $nested_results;
     if ( ! $nested_results->success ) {
       $error->{count}++;
       pop @$errors;
@@ -334,7 +338,11 @@ sub handle_array_input {
     }
   }
 
-  $self->move_from_valid_to_objects( $field, $results, $errors ) if $error->{count};
+  if ( ! $error->{count} ) {
+    $results->valid( $field => $all_results );
+  } else {
+    $self->move_from_valid_to_objects( $field, $results, $errors )
+  }
 }
 
 =head2 move_from_valid_to_objects
