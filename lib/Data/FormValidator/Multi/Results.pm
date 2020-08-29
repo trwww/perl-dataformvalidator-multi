@@ -5,6 +5,7 @@ use UNIVERSAL;
 
 package Data::FormValidator::Multi::Results;
 use base qw(Data::FormValidator::Results);
+use List::Util qw(all);
 
 =encoding utf8
 
@@ -44,7 +45,7 @@ sub success {
   my $self = shift;
 
   if ( $self->isa('ARRAY') ) {
-    return !! grep $_->success, @$self;
+    return all { $_->success } @$self;
   } else {
     return $self->has_objects ? undef : $self->SUPER::success;
   }

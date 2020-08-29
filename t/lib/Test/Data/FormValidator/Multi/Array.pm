@@ -16,6 +16,9 @@ sub array : Test(2) {
     $self->skeleton_data,
   ];
 
+  # make the second element valid
+  $data->[1]{dashboard} = 11;
+
   my $dfv = Data::FormValidator::Multi->new({
     profile     => $self->main_profile->profile,
     subprofiles => {
