@@ -6,6 +6,8 @@ use Data::FormValidator::Multi::Results;
 package Data::FormValidator::Multi;
 use base qw(Data::FormValidator);
 
+our $VERSION = '0.002';
+
 =encoding utf8
 
 =head1 NAME
